@@ -17,7 +17,7 @@ public class QueryController {
     private final ObtenerLibroQueryHandler obtenerLibroQueryHandler;
 
     @GetMapping("/{id}")
-    public ResponseEntity<LibroResponse> obtenerLibro(@PathVariable String id) {
+    public ResponseEntity<LibroResponse> obtenerLibro( String id) {
         ObtenerLibroQuery query = new ObtenerLibroQuery(id);
         LibroResponse response = obtenerLibroQueryHandler.handle(query);
         return ResponseEntity.ok(response);

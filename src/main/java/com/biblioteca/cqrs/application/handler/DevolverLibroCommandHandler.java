@@ -14,8 +14,8 @@ public class DevolverLibroCommandHandler {
     private final LibroRepository libroRepository;
 
     public void handle(DevolverLibroCommand command) {
-        log.info("[COMMAND] Ejecutando DevolverLibroCommand para libro {}", command.getLibroId());
-        Libro libro = libroRepository.buscarPorId(command.getLibroId());
+        log.info("[COMMAND] Ejecutando DevolverLibroCommand para libro {}", command.libroId());
+        Libro libro = libroRepository.buscarPorId(command.libroId());
         libro.devolver();
         libroRepository.guardar(libro);
     }

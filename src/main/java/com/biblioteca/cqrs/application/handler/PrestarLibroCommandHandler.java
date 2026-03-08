@@ -14,9 +14,9 @@ public class PrestarLibroCommandHandler {
     private final LibroRepository libroRepository;
 
     public void handle(PrestarLibroCommand command) {
-        log.info("[COMMAND] Ejecutando PrestarLibroCommand para libro {}", command.getLibroId());
-        Libro libro = libroRepository.buscarPorId(command.getLibroId());
-        libro.prestar(command.getUsuarioId());
+        log.info("[COMMAND] Ejecutando PrestarLibroCommand para libro {}", command.libroId());
+        Libro libro = libroRepository.buscarPorId(command.libroId());
+        libro.prestar(command.usuarioId());
         libroRepository.guardar(libro);
     }
 }

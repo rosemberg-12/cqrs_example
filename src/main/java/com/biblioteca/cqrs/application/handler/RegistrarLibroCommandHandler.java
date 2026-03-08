@@ -17,11 +17,11 @@ public class RegistrarLibroCommandHandler {
     }
 
     public void handle(RegistrarLibroCommand command) {
-        log.info("[COMMAND] Ejecutando RegistrarLibroCommand: {} - {}", command.getId(), command.getTitulo());
-        if (libroRepository.existePorId(command.getId())) {
-            throw new LibroYaRegistradoException(command.getId());
+        log.info("[COMMAND] Ejecutando RegistrarLibroCommand: {} - {}", command.id(), command.titulo());
+        if (libroRepository.existePorId(command.id())) {
+            throw new LibroYaRegistradoException(command.id());
         }
-        Libro libro = new Libro(command.getId(), command.getTitulo());
+        Libro libro = new Libro(command.id(), command.titulo());
         libroRepository.guardar(libro);
     }
 }

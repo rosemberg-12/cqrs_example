@@ -5,6 +5,7 @@ import com.biblioteca.cqrs.domain.exception.LibroYaRegistradoException;
 import com.biblioteca.cqrs.domain.exception.OperacionLibroInvalidaException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(LibroNoEncontradoException.class)
@@ -47,6 +49,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex, HttpServletRequest request) {
+        log.error("General error", ex);
         return buildErrorBody(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del sistema", request.getRequestURI());
     }
 
