@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex, HttpServletRequest request) {
         log.error("General error", ex);
-        return buildErrorBody(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del sistema, contacte a un administrador", request.getRequestURI());
+        return buildErrorBody(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del sistema, contacte a un administrador inmediatamente", request.getRequestURI());
     }
 
     private ResponseEntity<Map<String, Object>> buildErrorBody(HttpStatus status, String message, String path) {
