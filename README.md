@@ -210,7 +210,196 @@ flowchart TD
 ```
 
 ---
-# Version 2
-La version 2 de este proyecto, consiste el la contenerización del mismo, ajustando su CI (Github Actions) y su CD (a traves de ArgoCD)
+# Version 2: Contenerizacion, Kubernetes, Helm y ArgoCD
 
-## Docker
+Esta version del proyecto documenta el laboratorio de despliegue del microservicio CQRS usando:
+- Docker para empaquetado.
+- Minikube como cluster Kubernetes local.
+- Helm para plantillas y despliegue parametrizable.
+- ArgoCD para GitOps (sin incluir aun la fase de CI automatizado).
+
+## 1. Prerrequisitos
+
+- Docker Desktop instalado y corriendo.
+- Homebrew.
+- `kubectl`, `minikube`, `helm`.
+- Cuenta en Docker Hub.
+
+Instalaciones usadas:
+
+```bash
+brew install kubectl
+brew install minikube
+brew install helm
+```
+
+## 2. Dockerizacion de la aplicacion
+
+### 2.1 Build y ejecucion local
+
+```bash
+docker build -t cqrs-example:local .
+docker run --rm -p 8080:8080 cqrs-example:local
+```
+
+### 2.2 Publicacion en Docker Hub
+
+```bash
+docker login
+docker tag cqrs-example:local lordrosem/cqrs-example:dev
+docker push lordrosem/cqrs-example:dev
+```
+
+## 3. Kubernetes local con Minikube
+
+### 3.1 Levantar cluster
+
+```bash
+minikube start --driver=docker --cpus=2 --memory=4096
+```
+
+Notas:
+- Este comando crea/actualiza el contexto en `~/.kube/config`.
+- `kubectl` queda apuntando al cluster local `minikube`.
+
+### 3.2 Verificaciones iniciales
+
+```bash
+kubectl get nodes -o wide
+minikube addons enable metrics-server
+minikube dashboard
+```
+
+## 4. Helm chart del microservicio
+
+Estructura base creada:
+
+```text
+helm/cqrs-example
+├── Chart.yaml
+├── values.yaml
+├── values-dev.yaml
+└── templates
+    ├── _helpers.tpl
+    ├── deployment.yaml
+    ├── service.yaml
+    └── configmap.yaml
+```
+
+Resumen:
+- `Chart.yaml`: metadatos del chart.
+- `values.yaml`: valores base.
+- `values-dev.yaml`: override para entorno dev.
+- `templates/`: manifiestos Kubernetes parametrizados.
+
+## 5. Despliegue con Helm
+
+### 5.1 Validacion de chart
+
+```bash
+helm lint helm/cqrs-example
+helm template cqrs-demo helm/cqrs-example \
+  -f helm/cqrs-example/values.yaml \
+  -f helm/cqrs-example/values-dev.yaml
+```
+
+### 5.2 Instalacion/actualizacion
+
+```bash
+helm upgrade --install cqrs-demo helm/cqrs-example \
+  -f helm/cqrs-example/values.yaml \
+  -f helm/cqrs-example/values-dev.yaml \
+  --namespace cqrs-dev \
+  --create-namespace
+```
+
+### 5.3 Verificacion de despliegue
+
+```bash
+helm list -n cqrs-dev
+helm status cqrs-demo -n cqrs-dev
+kubectl get pods -n cqrs-dev -o wide
+kubectl get all -n cqrs-dev
+kubectl logs -n cqrs-dev deploy/cqrs-example --tail=50
+```
+
+## 6. Acceso a la aplicacion
+
+Como se usa Minikube con driver Docker en macOS, se expone con:
+
+```bash
+minikube service cqrs-example -n cqrs-dev --url
+```
+
+Luego se prueba, por ejemplo:
+
+```bash
+curl -i http://127.0.0.1:<puerto>/libros/1
+```
+
+Una respuesta `404` con mensaje de negocio (libro no encontrado) confirma que la app esta corriendo correctamente.
+
+## 7. Flujo manual de redeploy (simulando CI)
+
+Cada cambio de aplicacion siguio este flujo:
+
+```bash
+docker build -t cqrs-example:local .
+docker tag cqrs-example:local lordrosem/cqrs-example:dev
+docker push lordrosem/cqrs-example:dev
+helm upgrade --install cqrs-demo helm/cqrs-example \
+  -f helm/cqrs-example/values-dev.yaml \
+  -n cqrs-dev
+kubectl get pods -n cqrs-dev
+```
+
+Recomendacion:
+- usar tags versionados (`dev-001`, `dev-002`, etc.) en lugar de reutilizar siempre `dev`.
+
+## 8. Implementacion de ArgoCD (Fase 2)
+
+### 8.1 Instalacion
+
+```bash
+kubectl create namespace argocd
+kubectl apply --server-side -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+### 8.2 Crear Application del proyecto
+
+Archivo usado: `argocd/application-cqrs.yaml`
+
+```bash
+kubectl apply -f argocd/application-cqrs.yaml
+```
+
+### 8.3 Verificacion
+
+```bash
+kubectl get pods -n argocd
+kubectl get applications -n argocd
+kubectl describe application cqrs-example -n argocd
+```
+
+## 9. Acceso local a ArgoCD UI
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8081:443
+```
+
+Abrir:
+- `https://localhost:8081`
+
+Password inicial:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d; echo
+```
+
+## 10. Estado actual del laboratorio
+
+- Fase 1 (Docker + Kubernetes + Helm): completada y validada.
+- Fase 2 (ArgoCD base): instalada y configurada.
+- Fase 3 (CI con GitHub Actions y actualizacion automatica de tag en Helm): pendiente para siguiente iteracion.
