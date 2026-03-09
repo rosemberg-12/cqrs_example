@@ -1,0 +1,12 @@
+namespace:
+  name: cqrs-dev
+
+image:
+  repository: lordrosem/cqrs-example
+  tag: "dev"
+
+replicaCount: 1
+
+service:
+  type: NodePort
+  nodePort: 30080

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cqrs-example
+description: Helm chart for CQRS Example Spring Boot service
+type: application
+version: 0.1.0
+appVersion: "0.0.1"

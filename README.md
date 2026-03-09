@@ -210,3 +210,7 @@ flowchart TD
 ```
 
 ---
+# Version 2
+La version 2 de este proyecto, consiste el la contenerización del mismo, ajustando su CI (Github Actions) y su CD (a traves de ArgoCD)
+
+## Docker
