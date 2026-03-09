@@ -3,7 +3,7 @@ namespace:
 
 image:
   repository: lordrosem/cqrs-example
-  tag: "dev"
+  tag: "dev.5"
 
 replicaCount: 1
 
