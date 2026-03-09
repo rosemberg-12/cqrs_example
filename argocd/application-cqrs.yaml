@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cqrs-example
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rosemberg-12/cqrs_example.git
+    targetRevision: development
+    path: helm/cqrs-example
+    helm:
+      releaseName:
+      valueFiles:
+        - values.yaml
+        - values-dev.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cqrs-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
