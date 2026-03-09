@@ -1,0 +1,31 @@
+nameOverride: ""
+fullnameOverride: ""
+
+namespace:
+  create: true
+  name: cqrs-dev
+
+replicaCount: 1
+
+image:
+  repository: lordrosem/cqrs-example
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  nodePort: null
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 300m
+    memory: 512Mi
+
+config:
+  SERVER_PORT: "8080"
+  SPRING_APPLICATION_NAME: "cqrs"
